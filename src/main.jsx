@@ -7,6 +7,7 @@ import MainPage from './components/Pages/MainPage.jsx';
 import ProfilePage from './components/Pages/ProfilePage.jsx';
 import RegisterPage from './components/Pages/RegisterPage.jsx';
 import { auth } from './components/auth/firebase.js';
+import EntryPage from './components/Pages/EntryPage.jsx';
 
 const App = () => {
   const [user, setUser] = useState(null); // Initialize user state
@@ -19,7 +20,8 @@ const App = () => {
 
       <Router>
         <Routes>
-          <Route path="/" element={ user ? <Navigate to="/explore"/>:<LoginPage />} />
+          <Route path="/" element={ user ? <Navigate to="/explore"/>:<EntryPage />} />
+          <Route path="/login" element={ user ? <Navigate to="/explore"/>:<LoginPage />} />
           <Route path="/explore/*" element={<MainPage />}/>
           <Route path="/register/*" element={ user ? <Navigate to="/explore"/> : <RegisterPage />} />
           <Route path="/myProfile/*" element={ <ProfilePage />} />

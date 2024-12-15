@@ -1,4 +1,59 @@
+@import url("https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,200..800;1,200..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@100..900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer utilities {
+  .masonry-layout {
+    column-count: 3;
+    column-gap: 7px;
+  }
 
+  .masonry-item {
+    break-inside: avoid;
+    margin-bottom: 8px;
+  }
+
+  .karla-font {
+    font-family: "Karla", sans-serif;
+    font-optical-sizing: auto;
+  }
+  .kumbh-sans-font {
+    font-family: "Kumbh Sans", sans-serif;
+    font-optical-sizing: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Small screens */
+  .masonry-layout {
+    column-count: 1;
+    /* Align items vertically */
+    column-gap: 7px;
+  }
+
+  .masonry-layout-mob {
+    column-count: 3;
+    /* Align items vertically */
+    column-gap: 7px;
+  }
+
+  .masonry-item-mob {
+    break-inside: avoid;
+    margin-bottom: 8px;
+  }
+}
+
+@media (min-width: 630px) and (max-width: 1440px) {
+  /* Medium screens */
+  .masonry-layout {
+    column-count: 3;
+    /* Two columns */
+    /* column-gap: 13.8px; */
+  }
+
+  .masonry-item-mob {
+    break-inside: avoid;
+    margin-bottom: 8px;
+  }
+}
