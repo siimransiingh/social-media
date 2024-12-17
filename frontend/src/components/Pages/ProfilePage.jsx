@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
 import { auth, db } from "../auth/firebase";
 import { getDoc, doc } from "firebase/firestore";
-import supabase from "../API/supabase";
 
 function ProfilePage() {
   const [userDetail, setUserDetail] = useState(null);
-  const [file, setFile] = useState(null);
-  const [fileURL, setFileURL] = useState(null);
   
     const fetchUserData = async () => {
       auth.onAuthStateChanged(async (user) => {

@@ -8,7 +8,6 @@ function LoginPage() {
 
   const handleSubmit = async(e) => {
     e.preventDefault();
-    // Add your login or signup logic here
 
     try {
       await signInWithEmailAndPassword(auth, email, password)

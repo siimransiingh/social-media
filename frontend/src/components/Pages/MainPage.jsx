@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { auth, db } from "../auth/firebase";
-import { getDoc, doc } from "firebase/firestore";
+import { auth } from "../auth/firebase";
+import { getUser } from "../../API/userService";
 
 function MainPage() {
   const [userDetail, setUserDetail] = useState(null);
@@ -8,19 +8,19 @@ function MainPage() {
   const fetchUserData = async () => {
     auth.onAuthStateChanged(async (user) => {
       if (user) {
-
-        setUserDetail(user);
-   
-        const docRef = doc(db, "Users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUserDetail(docSnap.data());
+        try {
+          // Get the Firebase ID token
         
-        } else {
-          console.log("No user data found");
+          const idToken = await user.getIdToken();
+
+          // Fetch user data from your backend API and pass the token in the Authorization header
+          const response = await getUser(user.uid, idToken);  // Send token as second argument
+          setUserDetail(response.data); // Set user data from API response
+        } catch (error) {
+          console.error("Error fetching user data:", error);
         }
       } else {
-        console.log("User is nott logged in");
+        console.log("User is not logged in");
       }
     });
   };
@@ -42,7 +42,7 @@ function MainPage() {
   return (
     <div>
       {userDetail ? (
-        <h1>Welcome, {userDetail.firstName}!</h1>
+        <h1>Welcome, {userDetail.email}!</h1>
       ) : (
         <h1>Loading...</h1>
       )}
