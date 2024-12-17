@@ -24,7 +24,16 @@ function ProfilePage() {
         }
       });
     };
-  
+   async function handleLogout() {
+    try {
+      await auth.signOut();
+      window.location.href = "/";
+      console.log("Logged out");
+    } catch (err) {
+      console.error(err.message);
+    }
+  }
+
     useEffect(() => {
       fetchUserData();
     }, []);
