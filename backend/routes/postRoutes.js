@@ -29,30 +29,41 @@ const verifyIdToken = async (req, res, next) => {
 router.post('/', verifyIdToken, async (req, res) => {
   const { userId, mime, caption, media } = req.body;
 
+  console.log("Incoming Request Body:", req.body); // Log the entire incoming body
+
   if (!userId || !mime || !media || !Array.isArray(media)) {
+    console.log("Validation Error: Missing required fields or invalid media format");
     return res.status(400).json({ message: 'userId, mime, and media (array) are required fields' });
   }
 
   try {
-    // Create and save the post
+    console.log("Creating new Post...");
     const post = new Post({ mime, caption, media });
     await post.save();
+    console.log("Post Created Successfully:", post);
 
-    // Update user's posts array
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    console.log("Fetching User by ID:", userId);
+    const user = await User.findOne({uid:userId});
+    if (!user) {
+      console.log("User Not Found:", userId);
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-    user.posts.push(post._id);
+    console.log("Updating User's Posts Array...");
+    user.posts.push(post._id); // Use post._id here, not post.uid
     await user.save();
+    console.log("User Updated Successfully:", user);
 
     res.status(201).json({ message: 'Post created successfully', post });
   } catch (err) {
+    console.error("Error Creating Post:", err.message); // Log the error message
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
+
 // GET: Retrieve all posts
-router.get('/', async (req, res) => {
+router.get('/',verifyIdToken, async (req, res) => {
   try {
     const posts = await Post.find().sort({ createdAt: -1 }); // Sort by newest first
     res.status(200).json(posts);
@@ -62,7 +73,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET: Retrieve a single post by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', verifyIdToken,async (req, res) => {
   const { id } = req.params;
 
   try {

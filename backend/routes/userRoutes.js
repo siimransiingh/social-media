@@ -11,21 +11,21 @@ admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 
 const verifyIdToken = async (req, res, next) => {
   const idToken = req.headers.authorization?.split(' ')[1]; 
-  console.log('Received Token:', idToken); // Log the token for debugging
+
 
   if (!idToken) {
-    console.log('No token provided');
+  
     return res.status(401).json({ message: 'No token provided' });
   }
 
   try {
     // Verify the ID token using Firebase Admin SDK
     const decodedToken = await admin.auth().verifyIdToken(idToken);
-    console.log('Decoded Token:', decodedToken); // Log the decoded token
+  
     req.user = decodedToken; // Attach the decoded token to req.user
     next(); // Proceed to the next middleware or route handler
   } catch (err) {
-    console.error('Error verifying token:', err.message); // Log the error
+   
     return res.status(403).json({ message: 'Invalid token', error: err.message });
   }
 };
