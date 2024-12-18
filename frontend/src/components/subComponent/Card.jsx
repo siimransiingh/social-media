@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
+import ShareCard from "../subComponent/ShareCard";
 
 const Card = ({
   profilePic,
@@ -10,8 +11,16 @@ const Card = ({
   likes,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-
+  const [viewShare, setViewShare] = useState(false);
   const IMAGES_PER_VIEW = 2; // Number of images to display per row
+
+  const showShareCard = () => {
+    setViewShare(true); // Explicitly show the ShareCard
+  };
+
+  const hideShareCard = () => {
+    setViewShare(false); // Explicitly hide the ShareCard
+  };
 
   const handlePrev = () => {
     setCurrentIndex((prevIndex) =>
@@ -102,10 +111,11 @@ const Card = ({
           <span className=" mr-1 text-xl"><img src="/images/HiHeart.svg"/></span>
           <span className="text-[#D95B7F] font-semibold text-[12px] kumbh-sans-font">{likes}</span>
         </div>
-        <button className=" gap-1 flex items-center rounded-[30px] py-[7px]  bg-black bg-opacity-[0.07] hover:bg-gray-300  font-medium px-4">
+        <button onClick={showShareCard} className=" gap-1 flex items-center rounded-[30px] py-[7px]  bg-black bg-opacity-[0.07] hover:bg-gray-300  font-medium px-4">
           <img src="/images/navigation-2.svg"/> <span className="karla-font text-black">Share</span>
         </button>
       </div>
+       {viewShare && <div className="bg-opacity-[0.09]"><ShareCard  onClose={hideShareCard} /></div> }
     </div>
   );
 };

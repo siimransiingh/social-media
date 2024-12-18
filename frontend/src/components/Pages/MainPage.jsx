@@ -3,17 +3,15 @@ import { auth } from "../auth/firebase";
 import { getUser } from "../../API/userService";
 import Card from "../subComponent/Card";
 import { getAllPosts } from "../../API/postService";
-import ShareCard from "../subComponent/ShareCard";
+
 
 function MainPage() {
   const [userDetail, setUserDetail] = useState(null);
   const [posts, setPosts] = useState([]); // State to store posts
   const [loading, setLoading] = useState(true); // State for loading
-  const [viewShare, setViewShare] = useState(false);
 
-  const visibleShare = () => {
-    setViewShare(!viewShare);
-  };
+
+
 
   const fetchUserData = async () => {
     auth.onAuthStateChanged(async (user) => {
@@ -42,7 +40,15 @@ function MainPage() {
       }
     });
   };
-
+   async function handleLogout() {
+    try {
+      await auth.signOut();
+      window.location.href = "/";
+      console.log("Logged out");
+    } catch (err) {
+      console.error(err.message);
+    }
+  }
   useEffect(() => {
     fetchUserData();
   }, []);
@@ -57,15 +63,18 @@ function MainPage() {
         <div className="p-4 ">
           <div className="flex flex-col gap-[31px]">
             {" "}
-            <div className="flex flex-row items-center">
-              <img
+            <div className="flex flex-row justify-between items-center">
+              <div className="flex flex-row items-center">
+                <a href="/myProfile">
+              <img  href="/myProfile"
                 className="w-[50px] h-[50px] rounded-full"
                 src={
                   userDetail.displayPicture
                     ? userDetail.displayPicture
                     : "/images/userLogo.jpg"
                 }
-              />
+                  />
+                  </a>
               <div>
                 <p className=" kumbh-sans-font flex flex-col">
                   <span className="text-[10px] font-normal leading-[12.4px] color-[#000000] opacity-[33%]">
@@ -77,7 +86,9 @@ function MainPage() {
                     {userDetail.lastName ? userDetail.lastName : ""}{" "}
                   </span>
                 </p>
-              </div>
+                </div>
+                </div>
+              <p onClick={handleLogout}>logout</p>
             </div>
             <div>
               <p className="karla-font text-[#000000]  font-extrabold text-[24px]">
@@ -104,7 +115,7 @@ function MainPage() {
           </div>
           
           <div
-            onClick={visibleShare}
+           
             className="fixed rounded-full h-[50px] w-[50px] bottom-4 right-4 text-white bg-black z-100 flex items-center justify-center"
           >
             <img className="h-4 w-4" src="/images/BsPlusLg.svg" />
@@ -164,14 +175,14 @@ function MainPage() {
           </div>
           
           <div
-            onClick={visibleShare}
+            
             className="fixed rounded-full h-[50px] w-[50px] bottom-4 right-4 text-white bg-black z-100 flex items-center justify-center"
           >
             <img className="h-4 w-4" src="/images/BsPlusLg.svg" />
           </div>
         </div>
       )}
-      {viewShare && <div className="bg-opacity-[0.07]"><ShareCard /></div> }
+     
     </div>
   );
     </div>
