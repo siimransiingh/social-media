@@ -9,24 +9,23 @@ const Card = ({
   caption,
   postImages,
   likes,
+  bgColor, 
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [viewShare, setViewShare] = useState(false);
-  const IMAGES_PER_VIEW = 2; // Number of images to display per row
+  const IMAGES_PER_VIEW = 2; 
 
   const showShareCard = () => {
-    setViewShare(true); // Explicitly show the ShareCard
+    setViewShare(true);
   };
 
   const hideShareCard = () => {
-    setViewShare(false); // Explicitly hide the ShareCard
+    setViewShare(false); 
   };
 
   const handlePrev = () => {
     setCurrentIndex((prevIndex) =>
-      prevIndex - IMAGES_PER_VIEW < 0
-        ? 0
-        : prevIndex - IMAGES_PER_VIEW
+      prevIndex - IMAGES_PER_VIEW < 0 ? 0 : prevIndex - IMAGES_PER_VIEW
     );
   };
 
@@ -39,7 +38,9 @@ const Card = ({
   };
 
   return (
-    <div className="bg-[#F7EBFF] max-w-sm mx-auto p-3 mb-[10px] rounded-lg shadow-md">
+    <div
+      className={`w-full mx-auto p-3 mb-[10px] rounded-lg shadow-md ${bgColor}`}
+    >
       {/* Header */}
       <div className="flex items-center mb-[14px]">
         <img
@@ -67,7 +68,9 @@ const Card = ({
         <div
           className="flex transition-transform duration-300"
           style={{
-            transform: `translateX(-${(currentIndex / postImages.length) * 100}%)`,
+            transform: `translateX(-${
+              (currentIndex / postImages.length) * 100
+            }%)`,
           }}
         >
           {postImages.map((image, index) => (
@@ -108,26 +111,44 @@ const Card = ({
       {/* Footer */}
       <div className="flex justify-between items-center">
         <div className="flex items-center">
-          <span className=" mr-1 text-xl"><img src="/images/HiHeart.svg"/></span>
-          <span className="text-[#D95B7F] font-semibold text-[12px] kumbh-sans-font">{likes}</span>
+          <span className="mr-1 text-xl">
+            <img src="/images/HiHeart.svg" />
+          </span>
+          <span className="text-[#D95B7F] font-semibold text-[12px] kumbh-sans-font">
+            {likes}
+          </span>
         </div>
-        <button onClick={showShareCard} className=" gap-1 flex items-center rounded-[30px] py-[7px]  bg-black bg-opacity-[0.07] hover:bg-gray-300  font-medium px-4">
-          <img src="/images/navigation-2.svg"/> <span className="karla-font text-black">Share</span>
+        <button
+          onClick={showShareCard}
+          className="gap-1 flex items-center rounded-[30px] py-[7px] bg-black bg-opacity-[0.07] hover:bg-gray-300 font-medium px-4"
+        >
+          <img src="/images/navigation-2.svg" />{" "}
+          <span className="karla-font text-black">Share</span>
         </button>
       </div>
-       {viewShare && <div className="bg-opacity-[0.09]"><ShareCard  onClose={hideShareCard} /></div> }
+      {viewShare && (
+        <div className="bg-opacity-[0.09]">
+          <ShareCard onClose={hideShareCard} />
+        </div>
+      )}
     </div>
   );
 };
 
 // PropTypes Validation
 Card.propTypes = {
-  profilePic: PropTypes.string.isRequired, // URL of the profile picture
-  username: PropTypes.string.isRequired, // Username of the post owner
-  timeAgo: PropTypes.string.isRequired, // Time of the post
-  caption: PropTypes.string.isRequired, // Post caption
-  postImages: PropTypes.arrayOf(PropTypes.string).isRequired, // Array of image URLs
-  likes: PropTypes.number.isRequired, // Number of likes
+  profilePic: PropTypes.string.isRequired, 
+  username: PropTypes.string.isRequired, 
+  timeAgo: PropTypes.string.isRequired,
+  caption: PropTypes.string.isRequired, 
+  postImages: PropTypes.arrayOf(PropTypes.string).isRequired, 
+  likes: PropTypes.number.isRequired, 
+  bgColor: PropTypes.string, 
+};
+
+// Default props
+Card.defaultProps = {
+  bgColor: "bg-[#F7EBFF]", 
 };
 
 export default Card;

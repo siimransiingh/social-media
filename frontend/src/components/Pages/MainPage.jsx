@@ -3,15 +3,20 @@ import { auth } from "../auth/firebase";
 import { getUser } from "../../API/userService";
 import Card from "../subComponent/Card";
 import { getAllPosts } from "../../API/postService";
-
+import UploadButton from "../subComponent/UploadButton";
 
 function MainPage() {
   const [userDetail, setUserDetail] = useState(null);
   const [posts, setPosts] = useState([]); // State to store posts
   const [loading, setLoading] = useState(true); // State for loading
 
-
-
+  const colors = [
+    "bg-[#F7EBFF]",
+    "bg-[#FFFAEE]",
+    "bg-[#e1f7d5]",
+    "bg-[#ffbddd]",
+    "bg-[#c9c9ff]",
+  ];
 
   const fetchUserData = async () => {
     auth.onAuthStateChanged(async (user) => {
@@ -40,7 +45,7 @@ function MainPage() {
       }
     });
   };
-   async function handleLogout() {
+  async function handleLogout() {
     try {
       await auth.signOut();
       window.location.href = "/";
@@ -66,89 +71,32 @@ function MainPage() {
             <div className="flex flex-row justify-between items-center">
               <div className="flex flex-row items-center">
                 <a href="/myProfile">
-              <img  href="/myProfile"
-                className="w-[50px] h-[50px] rounded-full"
-                src={
-                  userDetail.displayPicture
-                    ? userDetail.displayPicture
-                    : "/images/userLogo.jpg"
-                }
+                  <img
+                    href="/myProfile"
+                    className="w-[50px] h-[50px] rounded-full"
+                    src={
+                      userDetail.displayPicture
+                        ? userDetail.displayPicture
+                        : "/images/userLogo.jpg"
+                    }
                   />
-                  </a>
-              <div>
-                <p className=" kumbh-sans-font flex flex-col">
-                  <span className="text-[10px] font-normal leading-[12.4px] color-[#000000] opacity-[33%]">
-                    Welcome Back,
-                  </span>
-                  <span className=" text-[16px] font-semibold leading-[19.84px] text-left text-[#000000]">
-                    {" "}
-                    {userDetail.firstName}{" "}
-                    {userDetail.lastName ? userDetail.lastName : ""}{" "}
-                  </span>
-                </p>
+                </a>
+                <div>
+                  <p className=" kumbh-sans-font flex flex-col">
+                    <span className="text-[10px] font-normal leading-[12.4px] color-[#000000] opacity-[33%]">
+                      Welcome Back,
+                    </span>
+                    <span className=" text-[16px] font-semibold leading-[19.84px] text-left text-[#000000]">
+                      {" "}
+                      {userDetail.firstName}{" "}
+                      {userDetail.lastName ? userDetail.lastName : ""}{" "}
+                    </span>
+                  </p>
                 </div>
-                </div>
-              <p onClick={handleLogout}>logout</p>
-            </div>
-            <div>
-              <p className="karla-font text-[#000000]  font-extrabold text-[24px]">
-                Feeds
-              </p>
-            </div>
-          </div>
-          <div className="mt-[19px]">
-            {posts.length > 0 ? (
-              posts.map((post) => (
-                <Card
-                  key={post._id} // Ensure each child has a unique key for performance
-                  profilePic="/images/userLogo.jpg"
-                  username="Aarav"
-                  timeAgo="2 hours ago"
-                  caption={post.caption}
-                  postImages={post.media}
-                  likes={67}
-                />
-              ))
-            ) : (
-              <p>No posts available.</p>
-            )}
-          </div>
-          
-          <div
-           
-            className="fixed rounded-full h-[50px] w-[50px] bottom-4 right-4 text-white bg-black z-100 flex items-center justify-center"
-          >
-            <img className="h-4 w-4" src="/images/BsPlusLg.svg" />
-          </div>
-        </div>
-      )}
-      return (
-    <div>
-      {userDetail && (
-        <div className="p-4 ">
-          <div className="flex flex-col gap-[31px]">
-            {" "}
-            <div className="flex flex-row items-center">
-              <img
-                className="w-[50px] h-[50px] rounded-full"
-                src={
-                  userDetail.displayPicture
-                    ? userDetail.displayPicture
-                    : "/images/userLogo.jpg"
-                }
-              />
-              <div>
-                <p className=" kumbh-sans-font flex flex-col">
-                  <span className="text-[10px] font-normal leading-[12.4px] color-[#000000] opacity-[33%]">
-                    Welcome Back,
-                  </span>
-                  <span className=" text-[16px] font-semibold leading-[19.84px] text-left text-[#000000]">
-                    {" "}
-                    {userDetail.firstName}{" "}
-                    {userDetail.lastName ? userDetail.lastName : ""}{" "}
-                  </span>
-                </p>
               </div>
+              <p onClick={handleLogout}>
+                <img className="w-5 h-5" src="/images/logout.svg" />
+              </p>
             </div>
             <div>
               <p className="karla-font text-[#000000]  font-extrabold text-[24px]">
@@ -156,9 +104,9 @@ function MainPage() {
               </p>
             </div>
           </div>
-          <div className="mt-[19px]">
+          <div className="mt-[19px] grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {posts.length > 0 ? (
-              posts.map((post) => (
+              posts.map((post, index) => (
                 <Card
                   key={post._id} // Ensure each child has a unique key for performance
                   profilePic="/images/userLogo.jpg"
@@ -167,24 +115,16 @@ function MainPage() {
                   caption={post.caption}
                   postImages={post.media}
                   likes={67}
+                  bgColor={colors[index % colors.length]}
                 />
               ))
             ) : (
               <p>No posts available.</p>
             )}
           </div>
-          
-          <div
-            
-            className="fixed rounded-full h-[50px] w-[50px] bottom-4 right-4 text-white bg-black z-100 flex items-center justify-center"
-          >
-            <img className="h-4 w-4" src="/images/BsPlusLg.svg" />
-          </div>
         </div>
       )}
-     
-    </div>
-  );
+      <UploadButton />
     </div>
   );
 }

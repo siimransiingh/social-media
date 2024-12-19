@@ -34,7 +34,7 @@ const platforms = [
   icon: PropTypes.string.isRequired,
 };
   return (
-    <div className="fixed top-0 left-0 w-full h-full px-4 flex items-center justify-center bg-[#444444] bg-opacity-[10%] z-50">
+    <div className="fixed top-0 left-0 w-full h-full  px-4 flex items-center justify-center bg-[#444444] bg-opacity-[10%] z-50">
       <div className="bg-white min-h-[379px] min-w-[328px] py-6 px-5 rounded-xl shadow-lg w-96">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-[22px] karla-font text-black font-bold">

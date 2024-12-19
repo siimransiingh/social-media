@@ -29,27 +29,36 @@ const MyPosts = () => {
   const postInfo = [
     { imgSrc: "/images/img4.svg", likes: 35, caption: "alala" },
     { imgSrc: "/images/img6.svg", likes: 35, caption: "alala" },
-    { imgSrc: "/images/img7.svg", likes: 35, caption: "alala" },
+    { imgSrc: "/images/img1.svg", likes: 35, caption: "alala" },
+    { imgSrc: "/images/img1.svg", likes: 35, caption: "alala" },
+    { imgSrc: "/images/img1.svg", likes: 35, caption: "alala" },
+    { imgSrc: "/images/img9.svg", likes: 35, caption: "alala" },
+    { imgSrc: "/images/img9.svg", likes: 35, caption: "alala" },
+    { imgSrc: "/images/img9.svg", likes: 35, caption: "alala" },
+    { imgSrc: "/images/img9.svg", likes: 35, caption: "alala" },
+    { imgSrc: "/images/img10.svg", likes: 35, caption: "alala" },
+    { imgSrc: "/images/img5.svg", likes: 35, caption: "alala" },
+    { imgSrc: "/images/img5.svg", likes: 35, caption: "alala" },
   ];
 
   // Post component to display each post
   const Post = ({ imgSrc, likes, caption }) => (
-    <div className="flex relative flex-col items-center mb-6">
-      <div className="flex  justify-center items-center p-2 ">
+    <div className="flex flex-col">
+      <div className="flex  relative">
+        <div className="absolute bottom-6 left-3">
+          <div className="flex flex-col items-left justify-center">
+            <p className="text-sm text-white kumbh-sans-font mt-2">{caption}</p>
+            <div className="flex flex-row items-center">
+              <img src="/images/HiHeartWhite.svg" />{" "}
+              <p className="text-xs text-white font-semibold">{likes}</p>
+            </div>
+          </div>
+        </div>
         <img
-          className="min-w-[158px] h-[192px] object-cover rounded-lg"
+          className="masonry-item-mob min-h-full min-w-full object-cover rounded-lg"
           src={imgSrc}
           alt="Post"
         />
-      </div>
-      <div className="absolute bottom-4 left-3">
-        <div className="flex flex-col items-left justify-center">
-          <p className="text-sm text-white kumbh-sans-font mt-2">{caption}</p>
-          <div className="flex flex-row items-center">
-            <img src="/images/HiHeartWhite.svg" />{" "}
-            <p className="text-xs text-white font-semibold">{likes}</p>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -71,8 +80,8 @@ const MyPosts = () => {
             <p className="karla-font font-semibold text-[18px] text-black mt-6">
               My Posts
             </p>
-            <div className="overflow-y-auto overflow-x-hidden max-h-[200px]">
-              <div className=" grid grid-cols-2 gap-2 ">
+            <div className="overflow-y-auto overflow-x-hidden max-h-[400px]">
+              <div className="masonry-layout-mob masonry-layout mt-4">
                 {postInfo.map((post, index) => (
                   <Post
                     key={index}
