@@ -3,7 +3,7 @@ import { auth } from "../auth/firebase";
 import { getUser } from "../../API/userService";
 import { getPostofUser } from "../../API/postService";
 
-const MyPosts = () => {
+const MyPosts = ({ firstName, bio  }) => {
   const [userDetail, setUserDetail] = useState(null);
   const [postImg, setPostsImg] = useState([]);
 
@@ -25,6 +25,9 @@ const MyPosts = () => {
       console.error("Error fetching user data:", error);
     }
   };
+  useEffect(() => {
+    console.log("User details:", userDetail); // Check the structure of the userDetail object
+  }, [userDetail]);
 
   useEffect(() => {
     fetchUserData();
@@ -35,38 +38,39 @@ const MyPosts = () => {
   }, [postImg]);
 
   // Post component to display each post
-const Post = ({ media, likes, caption }) => {
-  return (
-    <div className="flex flex-col mb-4">
-      <div className="relative">
-        <div className="absolute bottom-6 left-3 z-10">
-          <div className="flex flex-col items-left justify-center">
-            <p className="text-sm text-white kumbh-sans-font mt-2">{caption}</p>
-            <div className="flex flex-row items-center">
-              <img src="/images/HiHeartWhite.svg" alt="Likes" />
-              <p className="text-xs text-white font-semibold">{likes}</p>
+  const Post = ({ media, likes, caption }) => {
+    return (
+      <div className="flex flex-col mb-4">
+        <div className="relative">
+          <div className="absolute bottom-6 left-3 z-10">
+            <div className="flex flex-col items-left justify-center">
+              <p className="text-sm text-white kumbh-sans-font mt-2">
+                {caption}
+              </p>
+              <div className="flex flex-row items-center">
+                <img src="/images/HiHeartWhite.svg" alt="Likes" />
+                <p className="text-xs text-white font-semibold">{likes}</p>
+              </div>
             </div>
           </div>
+
+          {/* Display only the first image from the media array */}
+          <img
+            className="masonry-item-mob min-h-full min-w-full object-cover rounded-lg"
+            src={media[0]}
+            alt={`Media 1`}
+          />
+
+          {/* Display number of images in the media array */}
+          {media.length > 1 && (
+            <div className="absolute bottom-3 right-3 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded-full">
+              {media.length} {media.length > 1 ? "images" : "image"}
+            </div>
+          )}
         </div>
-
-        {/* Display only the first image from the media array */}
-        <img
-          className="masonry-item-mob min-h-full min-w-full object-cover rounded-lg"
-          src={media[0]}
-          alt={`Media 1`}
-        />
-
-        {/* Display number of images in the media array */}
-        {media.length > 1 && (
-          <div className="absolute bottom-3 right-3 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded-full">
-            {media.length} {media.length > 1 ? "images" : "image"}
-          </div>
-        )}
       </div>
-    </div>
-  );
-};
-
+    );
+  };
 
   return (
     <div>
@@ -74,11 +78,10 @@ const Post = ({ media, likes, caption }) => {
         <div>
           <div>
             <p className="karla-font text-black text-[24px] font-extrabold">
-              {userDetail.firstName}
+              {firstName}
             </p>
             <p className="kumbh-sans-font text-black font-normal text-[14px]">
-              Just someone who loves designing, sketching, and finding beauty in
-              the little things 💕
+          {bio}
             </p>
           </div>
           <div>

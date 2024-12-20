@@ -8,7 +8,7 @@ admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 
 const verifyIdToken = async (req, res, next) => {
   const idToken = req.headers.authorization?.split(" ")[1];
-
+console.log(idToken)
   if (!idToken) {
     return res.status(401).json({ message: "No token provided" });
   }
@@ -58,16 +58,18 @@ router.get("/:uid", verifyIdToken, async (req, res) => {
   }
 });
 
+
+// edit user detail
 router.patch("/:uid", verifyIdToken, async (req, res) => {
   try {
     const user = await User.findOne({ uid: req.params.uid });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+ const { firstName, backgroundPicture, bio, displayPicture } = req.body;
 
     // Update fields if provided
     if (firstName) user.firstName = firstName;
-    if (lastName) user.lastName = lastName;
     if (bio) user.bio = bio;
     if (displayPicture) user.displayPicture = displayPicture;
     if (backgroundPicture) user.backgroundPicture = backgroundPicture;

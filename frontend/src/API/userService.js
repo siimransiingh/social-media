@@ -12,10 +12,11 @@ export const getUser = (id, idToken) => {
   });
 };
 
-export const editUser = (id, idToken) => {
-  return API.get(`/${id}`, {
+export const editUser = (id, idToken, userData,) => {
+  return API.patch(`/${id}`,  userData,{
     headers: {
       Authorization: `Bearer ${idToken}`,
     },
   });
+   
 };

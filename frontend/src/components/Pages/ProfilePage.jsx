@@ -96,7 +96,7 @@ function ProfilePage() {
                 {/* Pass handleBackClick to go back */}
               </div>
             ) : (
-              <MyPosts />
+              <MyPosts firstName={userDetail?.data.firstName} bio={userDetail?.data?.bio}/>
             )}
           </div>
         </div>

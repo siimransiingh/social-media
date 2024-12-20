@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 
 dotenv.config();
-console.log('MONGO_URI:', process.env.MONGO_URI);
+
 // Check if MONGO_URI is defined
 if (!process.env.MONGO_URI) {
   console.error('MONGO_URI is not defined in environment variables');
