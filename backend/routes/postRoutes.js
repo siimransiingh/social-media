@@ -6,69 +6,119 @@ const router = express.Router();
 
 const verifyIdToken = async (req, res, next) => {
   const idToken = req.headers.authorization?.split(' ')[1]; 
-  console.log('Received Token:', idToken); // Log the token for debugging
+
 
   if (!idToken) {
-    console.log('No token provided');
     return res.status(401).json({ message: 'No token provided' });
   }
 
   try {
     // Verify the ID token using Firebase Admin SDK
     const decodedToken = await admin.auth().verifyIdToken(idToken);
-    console.log('Decoded Token:', decodedToken); // Log the decoded token
+
     req.user = decodedToken; // Attach the decoded token to req.user
     next(); // Proceed to the next middleware or route handler
   } catch (err) {
-    console.error('Error verifying token:', err.message); // Log the error
+  
     return res.status(403).json({ message: 'Invalid token', error: err.message });
   }
 };
 
 // POST: Create a new post with multiple media
 router.post('/', verifyIdToken, async (req, res) => {
-  const { userId, mime, caption, media } = req.body;
+  console.log('Received request body:', req.body); // Add this log
 
-  console.log("Incoming Request Body:", req.body); // Log the entire incoming body
+  const { userId, mime, caption, media, text } = req.body;
 
-  if (!userId || !mime || !media || !Array.isArray(media)) {
-    console.log("Validation Error: Missing required fields or invalid media format");
-    return res.status(400).json({ message: 'userId, mime, and media (array) are required fields' });
+  // Validate required fields
+  if (!userId) {
+    return res.status(400).json({ message: 'userId is required' });
   }
 
   try {
-    console.log("Creating new Post...");
-    const post = new Post({ mime, caption, media });
-    await post.save();
-    console.log("Post Created Successfully:", post);
-
-    console.log("Fetching User by ID:", userId);
-    const user = await User.findOne({uid:userId});
+    // Find user first
+    const user = await User.findOne({ uid: userId });
     if (!user) {
-      console.log("User Not Found:", userId);
       return res.status(404).json({ message: 'User not found' });
     }
 
-    console.log("Updating User's Posts Array...");
-    user.posts.push(post._id); // Use post._id here, not post.uid
-    await user.save();
-    console.log("User Updated Successfully:", user);
+    // Create post
+    const post = new Post({ 
+      userID: userId,
+      mime: mime || 'text/plain', // Default mime type
+      caption: caption || '',
+      media: Array.isArray(media) ? media : [],
+      text: text || ''
+    });
+    
+    console.log('Attempting to save post:', post); // Add this log
+    const savedPost = await post.save();
+    console.log('Post saved successfully:', savedPost); // Add this log
 
-    res.status(201).json({ message: 'Post created successfully', post });
+    // Update user's posts array
+    user.posts.push(savedPost._id);
+    await user.save();
+
+    res.status(201).json({ 
+      message: 'Post created successfully', 
+      post: savedPost 
+    });
   } catch (err) {
-    console.error("Error Creating Post:", err.message); // Log the error message
-    res.status(500).json({ message: 'Server error', error: err.message });
+    console.error('Server error:', err); // Add detailed error logging
+    res.status(500).json({ 
+      message: 'Server error', 
+      error: err.message,
+      details: err.stack 
+    });
   }
 });
 
 
 // GET: Retrieve all posts
-router.get('/',verifyIdToken, async (req, res) => {
+router.get('/', verifyIdToken,async (req, res) => {
   try {
-    const posts = await Post.find().sort({ createdAt: -1 }); // Sort by newest first
-    res.status(200).json(posts);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    // Using MongoDB aggregation to join posts with users
+    const posts = await Post.aggregate([
+      {
+        $lookup: {
+          from: 'users', // The collection name is lowercase 'users'
+          let: { userId: '$userID' }, // The field from posts
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$uid', '$$userId'] // Matching uid from users with userID from posts
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                firstName: 1,
+                lastName: 1,
+                displayPicture: 1,
+                email: 1,
+                bio: 1
+              }
+            }
+          ],
+          as: 'user'
+        }
+      },
+      {
+        $addFields: {
+          user: { $arrayElemAt: ['$user', 0] } // Convert user array to object
+        }
+      },
+      {
+        $sort: { createdAt: -1 } // Sort by newest first
+      }
+    ]);
+
+    res.json(posts);
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    res.status(500).json({ message: 'Error fetching posts', error: error.message });
   }
 });
 

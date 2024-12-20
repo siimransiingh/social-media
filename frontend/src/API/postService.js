@@ -7,11 +7,20 @@ const API = axios.create({ baseURL: 'http://localhost:5000/api/posts' });
 
 
 // API to create a new post
-export const createPost = (postData,idToken) => API.post('/', postData,  {
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-    },
-  });
+export const createPost = async (postData, idToken) => {
+  try {
+    const response = await API.post('/', postData, {
+      headers: {
+        'Authorization': `Bearer ${idToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    return response;
+  } catch (error) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw error;
+  }
+};
 
 // API to get all posts
 export const getAllPosts = (idToken) => API.get('/',  {

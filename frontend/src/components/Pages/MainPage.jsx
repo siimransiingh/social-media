@@ -33,7 +33,7 @@ function MainPage() {
           // Fetch posts using the ID token
           const postsResponse = await getAllPosts(idToken);
           setPosts(postsResponse.data); // Set posts data
-          console.log(postsResponse.data);
+         
           setLoading(false); // Set loading to false once data is fetched
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -57,10 +57,17 @@ function MainPage() {
   useEffect(() => {
     fetchUserData();
   }, []);
-
+console.log(posts)
   if (loading) {
-    return <div>Loading...</div>; // Show loading state
+    return <div>Loading...</div>; 
   }
+const calculateTimeAgoInHours = (createdAt) => {
+  const createdTime = new Date(createdAt).getTime(); 
+  const currentTime = Date.now(); 
+  const differenceInMilliseconds = currentTime - createdTime; 
+  const differenceInHours = differenceInMilliseconds / (1000 * 60 * 60);
+  return Math.floor(differenceInHours); 
+};
 
   return (
     <div>
@@ -110,12 +117,15 @@ function MainPage() {
                 <Card
                   key={post._id} // Ensure each child has a unique key for performance
                   profilePic="/images/userLogo.jpg"
-                  username="Aarav"
-                  timeAgo="2 hours ago"
+                  username={post?.user?.firstName}
+                  timeAgo={`${calculateTimeAgoInHours(
+                    post?.createdAt
+                  )} hours ago`}
                   caption={post.caption}
                   postImages={post.media}
                   likes={67}
                   bgColor={colors[index % colors.length]}
+                  text={post.text}
                 />
               ))
             ) : (

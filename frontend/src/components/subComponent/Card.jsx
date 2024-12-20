@@ -9,18 +9,19 @@ const Card = ({
   caption,
   postImages,
   likes,
-  bgColor, 
+  bgColor,
+  text,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [viewShare, setViewShare] = useState(false);
-  const IMAGES_PER_VIEW = 2; 
+  const IMAGES_PER_VIEW = 2;
 
   const showShareCard = () => {
     setViewShare(true);
   };
 
   const hideShareCard = () => {
-    setViewShare(false); 
+    setViewShare(false);
   };
 
   const handlePrev = () => {
@@ -64,49 +65,55 @@ const Card = ({
       </p>
 
       {/* Carousel - Multi-Image View */}
-      <div className="relative w-full overflow-hidden mb-4">
-        <div
-          className="flex transition-transform duration-300"
-          style={{
-            transform: `translateX(-${
-              (currentIndex / postImages.length) * 100
-            }%)`,
-          }}
-        >
-          {postImages.map((image, index) => (
-            <div
-              key={index}
-              className="flex-shrink-0 w-1/2 px-1"
-              style={{ flex: `0 0 ${100 / IMAGES_PER_VIEW}%` }}
+      {text ? (
+        <p className="text-[#000000] text-lg  mb-2 kumbh-sans-font font-semibold ">
+          {text}{" "}
+        </p>
+      ) : (
+        <div className="relative w-full overflow-hidden mb-4">
+          <div
+            className="flex transition-transform duration-300"
+            style={{
+              transform: `translateX(-${
+                (currentIndex / postImages.length) * 100
+              }%)`,
+            }}
+          >
+            {postImages.map((image, index) => (
+              <div
+                key={index}
+                className="flex-shrink-0 w-1/2 px-1"
+                style={{ flex: `0 0 ${100 / IMAGES_PER_VIEW}%` }}
+              >
+                <img
+                  src={image}
+                  alt={`Post ${index + 1}`}
+                  className="w-full h-40 object-cover rounded-lg"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Navigation Buttons */}
+          {currentIndex > 0 && (
+            <button
+              onClick={handlePrev}
+              className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-gray-700 text-white p-1 rounded-full hover:bg-gray-800"
             >
-              <img
-                src={image}
-                alt={`Post ${index + 1}`}
-                className="w-full h-40 object-cover rounded-lg"
-              />
-            </div>
-          ))}
+              &#8592;
+            </button>
+          )}
+
+          {currentIndex + IMAGES_PER_VIEW < postImages.length && (
+            <button
+              onClick={handleNext}
+              className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-gray-700 text-white p-1 rounded-full hover:bg-gray-800"
+            >
+              &#8594;
+            </button>
+          )}
         </div>
-
-        {/* Navigation Buttons */}
-        {currentIndex > 0 && (
-          <button
-            onClick={handlePrev}
-            className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-gray-700 text-white p-1 rounded-full hover:bg-gray-800"
-          >
-            &#8592;
-          </button>
-        )}
-
-        {currentIndex + IMAGES_PER_VIEW < postImages.length && (
-          <button
-            onClick={handleNext}
-            className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-gray-700 text-white p-1 rounded-full hover:bg-gray-800"
-          >
-            &#8594;
-          </button>
-        )}
-      </div>
+      )}
 
       {/* Footer */}
       <div className="flex justify-between items-center">
@@ -137,18 +144,19 @@ const Card = ({
 
 // PropTypes Validation
 Card.propTypes = {
-  profilePic: PropTypes.string.isRequired, 
-  username: PropTypes.string.isRequired, 
+  profilePic: PropTypes.string.isRequired,
+  username: PropTypes.string.isRequired,
   timeAgo: PropTypes.string.isRequired,
-  caption: PropTypes.string.isRequired, 
-  postImages: PropTypes.arrayOf(PropTypes.string).isRequired, 
-  likes: PropTypes.number.isRequired, 
-  bgColor: PropTypes.string, 
+  caption: PropTypes.string.isRequired,
+  text: PropTypes.string.isRequired,
+  postImages: PropTypes.arrayOf(PropTypes.string).isRequired,
+  likes: PropTypes.number.isRequired,
+  bgColor: PropTypes.string,
 };
 
 // Default props
 Card.defaultProps = {
-  bgColor: "bg-[#F7EBFF]", 
+  bgColor: "bg-[#F7EBFF]",
 };
 
 export default Card;

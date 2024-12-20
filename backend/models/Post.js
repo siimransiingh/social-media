@@ -1,12 +1,12 @@
 const { Schema, model } = require("mongoose");
-const { v4: uuidv4 } = require("uuid");
 
 const postSchema = new Schema({
-  mime: { type: String, required: true },
-  caption: { type: String },
+  mime: { type: String, default: 'text/plain' },
+  caption: { type: String, default: '' },
   media: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
-  postID: { type: String, default: uuidv4 },
+  userID: { type: String, required: true },
+  text: { type: String, default: '' }
 });
 
 module.exports = model("Post", postSchema);

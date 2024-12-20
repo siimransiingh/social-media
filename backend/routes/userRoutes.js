@@ -25,7 +25,6 @@ const verifyIdToken = async (req, res, next) => {
     req.user = decodedToken; // Attach the decoded token to req.user
     next(); // Proceed to the next middleware or route handler
   } catch (err) {
-   
     return res.status(403).json({ message: 'Invalid token', error: err.message });
   }
 };
