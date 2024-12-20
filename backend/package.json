@@ -5,6 +5,7 @@
     "express": "^4.21.2",
     "firebase-admin": "^13.0.1",
     "mongoose": "^8.9.0",
-    "uuid": "^11.0.3"
+    "uuid": "^11.0.3",
+    "zustand": "^5.0.2"
   }
 }

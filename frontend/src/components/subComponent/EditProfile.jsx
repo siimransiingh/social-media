@@ -1,16 +1,20 @@
 import { useState, useEffect } from "react";
 import { auth } from "../auth/firebase";
 import { editUser } from "../../API/userService";
+import useUserStore from "../../store/userStore";
 
-const EditProfile = ({ onSave, initialData, profilePicture , bgPicture }) => {
+
+const EditProfile = ({ onSave, initialData }) => {
+   const { updateUserProfile, profilePicture, backgroundPicture } =
+     useUserStore();
+
   const [formData, setFormData] = useState({
     firstName: "",
     bio: "",
-    profilePicture: "",
-    bgpicture : ""
-
+    displayPicture: "",
+    backgroundPicture: "",
   });
-console.log(bgPicture);
+
    useEffect(() => {
      // Initialize form with user data if available
      if (initialData) {
@@ -18,12 +22,12 @@ console.log(bgPicture);
          firstName: initialData.firstName || "",
          bio: initialData.bio || "",
          displayPicture: profilePicture || "",
-         backgroundPicture: bgPicture || "",
+         backgroundPicture: backgroundPicture || "",
        });
      }
 
-     console.log("changed")
-   }, [initialData]);
+     console.log("changed");
+   }, [initialData, profilePicture, backgroundPicture]);
   
   // Handle input change for firstName and bio
 const handleInput = (e) => {
@@ -35,24 +39,21 @@ const handleInput = (e) => {
 };
 
   // Handle Save button click
-  const handleSave = async () => {
-    try {
-      auth.onAuthStateChanged(async (user) => {
-        if (user) {
-          const idToken = await user.getIdToken();
+const handleSave = async () => {
+  try {
+    // Include the current profile and background picture URLs in the update
+    const updatedData = {
+      ...formData,
+      displayPicture: profilePicture,
+      backgroundPicture: backgroundPicture,
+    };
 
-          const response = await editUser(user.uid, idToken, formData);
-
-          console.log("User updated:", response.data);
-          onSave(); // Call onSave to close the form or update the UI
-        } else {
-          console.log("User is not logged in");
-        }
-      });
-    } catch (error) {
-      console.error("Error updating user:", error);
-    }
-  };
+    await updateUserProfile(updatedData);
+    onSave();
+  } catch (error) {
+    console.error("Error saving profile:", error);
+  }
+};
 
   return (
     <div className="flex flex-col gap-4 p-4 max-w-full mx-auto">

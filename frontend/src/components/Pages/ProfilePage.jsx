@@ -1,54 +1,23 @@
-import { useEffect, useState } from "react";
-import { auth } from "../auth/firebase";
+import { useEffect } from "react";
 import MyPosts from "../subComponent/MyPosts";
 import EditProfile from "../subComponent/EditProfile";
 import UploadButton from "../subComponent/UploadButton";
-import { getUser } from "../../API/userService";
-import { cloudinaryConfig } from "../../../config/cloudinary";
+import useUserStore from "../../store/userStore";
 
 function ProfilePage() {
-  const [userDetail, setUserDetail] = useState(null);
-  const [isEditing, setIsEditing] = useState(false); // State to track if edit mode is active
-  const [profilePicture, setProfilePicture] = useState();
-  const [backgroundPicture, setBackgroundPicture] = useState();
-  const fetchUserData = async () => {
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        const idToken = await user.getIdToken();
-        const userDetail = await getUser(user.uid, idToken);
-        console.log("detail", userDetail.data);
-        setUserDetail(userDetail);
-      } else {
-        console.log("User is not logged in");
-      }
-    });
-  };
+  const {
+    userDetail,
+    isEditing,
+    profilePicture,
+    backgroundPicture,
+    fetchUserData,
+    setIsEditing,
+  } = useUserStore();
 
   useEffect(() => {
     fetchUserData();
   }, []);
 
-  const uploadMedia = async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", cloudinaryConfig.uploadPreset); // Get this from Cloudinary dashboard
-
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      const data = await response.json();
-      return data.secure_url;
-    } catch (error) {
-      console.error("Upload failed:", error);
-      throw error;
-    }
-  };
 
   const handleEditClick = () => {
     setIsEditing(true); // Switch to edit mode
@@ -63,32 +32,6 @@ function ProfilePage() {
     return <p>Loading...</p>;
   }
 
-  const handleProfilePictureChange = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      try {
-        const uploadedUrl = await uploadMedia(file);
-        setProfilePicture(uploadedUrl);
-      } catch (error) {
-        console.error("Error updating profile picture:", error);
-      }
-    }
-  };
-
-  const handleBackgroundPictureChange = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      try {
-        const uploadedUrl = await uploadMedia(file);
-        setBackgroundPicture(uploadedUrl);
-      } catch (error) {
-        console.error("Error updating background picture:", error);
-      }
-    }
-  };
-
-  console.log(profilePicture);
-  console.log(backgroundPicture);
   return (
     <div className=" fixed w-full">
       {userDetail && (
@@ -99,7 +42,12 @@ function ProfilePage() {
             accept="image/*"
             className="hidden"
             id="backgroundPictureInput"
-            onChange={handleBackgroundPictureChange}
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                useUserStore.getState().handleBackgroundPictureChange(file);
+              }
+            }}
           />
           <a href="/explore">
             <img
@@ -115,7 +63,6 @@ function ProfilePage() {
                   console.log("Div clicked");
                   document.getElementById("backgroundPictureInput").click();
                 }}
-               
               >
                 <img
                   alt="editBg"
@@ -139,7 +86,12 @@ function ProfilePage() {
                 accept="image/*"
                 className="hidden"
                 id="profilePictureInput"
-                onChange={handleProfilePictureChange}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    useUserStore.getState().handleProfilePictureChange(file);
+                  }
+                }}
               />
               {isEditing && (
                 <div
@@ -173,7 +125,9 @@ function ProfilePage() {
           <div className="z-100 fixed px-4 top-[32%] w-full">
             {isEditing ? (
               <div className="mt-[30px]">
-                <EditProfile profilePicture={profilePicture} bgPicture={backgroundPicture}
+                <EditProfile
+                  profilePicture={profilePicture}
+                  bgPicture={backgroundPicture}
                   onSave={handleSave}
                   initialData={userDetail.data}
                 />{" "}

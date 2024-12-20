@@ -2,6 +2,7 @@ import { useState } from "react";
 import { auth } from "./../auth/firebase";
 import { createPost } from "../../API/postService";
 import { cloudinaryConfig } from "../../../config/cloudinary";
+import useUserStore from "../../store/userStore";
 
 const UploadPost = ({ onBack }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -9,6 +10,8 @@ const UploadPost = ({ onBack }) => {
   const [caption, setCaption] = useState("");
   const [text, setText] = useState("");
 
+  const { uploadMedia, fetchUserData } = useUserStore()
+  
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
     setSelectedFiles((prevFiles) => [...prevFiles, ...files]);
@@ -38,27 +41,27 @@ const UploadPost = ({ onBack }) => {
     });
   };
 
-  const uploadMedia = async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", cloudinaryConfig.uploadPreset); // Get this from Cloudinary dashboard
+  // const uploadMedia = async (file) => {
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("file", file);
+  //     formData.append("upload_preset", cloudinaryConfig.uploadPreset); // Get this from Cloudinary dashboard
 
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+  //     const response = await fetch(
+  //       `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`,
+  //       {
+  //         method: "POST",
+  //         body: formData,
+  //       }
+  //     );
 
-      const data = await response.json();
-      return data.secure_url;
-    } catch (error) {
-      console.error("Upload failed:", error);
-      throw error;
-    }
-  };
+  //     const data = await response.json();
+  //     return data.secure_url;
+  //   } catch (error) {
+  //     console.error("Upload failed:", error);
+  //     throw error;
+  //   }
+  // };
 
   const handleUpload = async () => {
     try {
@@ -76,7 +79,7 @@ const UploadPost = ({ onBack }) => {
         const uploadPromises = selectedFiles.map((file) => uploadMedia(file));
         mediaUrls = await Promise.all(uploadPromises);
       }
-      console.log(mediaUrls);
+     
       const postData = {
         userId: user.uid,
         mime: selectedFiles.length > 0 ? selectedFiles[0].type : "text/plain",
@@ -89,11 +92,7 @@ const UploadPost = ({ onBack }) => {
 
       const response = await createPost(postData, idToken);
       console.log("Post Created:", response.data);
-      alert("Post uploaded successfully!");
-      setSelectedFiles([]);
-      setCaption("");
-      setText("");
-      onBack();
+      await fetchUserData();
     } catch (error) {
       console.error("Error uploading post:", error);
       if (error.response) {

@@ -1,15 +1,28 @@
 import { useEffect, useState } from "react";
 import { auth } from "../auth/firebase";
-import { getUser } from "../../API/userService";
 import Card from "../subComponent/Card";
-import { getAllPosts } from "../../API/postService";
 import UploadButton from "../subComponent/UploadButton";
+import useUserStore from "../../store/userStore";
 
 function MainPage() {
-  const [userDetail, setUserDetail] = useState(null);
-  const [posts, setPosts] = useState([]); // State to store posts
+  const { allPosts, userDetail, fetchUserData } = useUserStore();
   const [loading, setLoading] = useState(true); // State for loading
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        await fetchUserData(); // Fetch user data and posts
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      }
+    };
 
+    fetchData();
+  }, [fetchUserData]);
+
+  console.log(allPosts); 
   const colors = [
     "bg-[#F7EBFF]",
     "bg-[#FFFAEE]",
@@ -18,34 +31,6 @@ function MainPage() {
     "bg-[#c9c9ff]",
   ];
 
-  const fetchUserData = async () => {
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        try {
-          // Get the Firebase ID token
-
-          const idToken = await user.getIdToken();
-
-          // Fetch user data from your backend API and pass the token in the Authorization header
-          const response = await getUser(user.uid, idToken); // Send token as second argument
-          setUserDetail(response.data); // Set user data from API response
-
-          // Fetch posts using the ID token
-          const postsResponse = await getAllPosts(idToken);
-          setPosts(postsResponse.data); // Set posts data
-
-          setLoading(false); // Set loading to false once data is fetched
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          setLoading(false);
-        }
-      } else {
-        console.log("User is not logged in");
-        setLoading(false);
-      }
-    });
-  };
-  
   async function handleLogout() {
     try {
       await auth.signOut();
@@ -58,7 +43,7 @@ function MainPage() {
   useEffect(() => {
     fetchUserData();
   }, []);
-  console.log(posts);
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -83,7 +68,9 @@ function MainPage() {
                   <img
                     href="/myProfile"
                     className="w-[50px] h-[50px] rounded-full object-cover"
-                    src={userDetail.displayPicture || "/images/userLogo.jpg"}
+                    src={
+                      userDetail.data.displayPicture || "/images/userLogo.jpg"
+                    }
                   />
                 </a>
                 <div>
@@ -93,8 +80,8 @@ function MainPage() {
                     </span>
                     <span className=" text-[16px] font-semibold leading-[19.84px] text-left text-[#000000]">
                       {" "}
-                      {userDetail.firstName}{" "}
-                      {userDetail.lastName ? userDetail.lastName : ""}{" "}
+                      {userDetail.data.firstName}{" "}
+                      {userDetail.data.lastName ? userDetail.data.lastName : ""}{" "}
                     </span>
                   </p>
                 </div>
@@ -110,11 +97,13 @@ function MainPage() {
             </div>
           </div>
           <div className="mt-[19px] grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {posts.length > 0 ? (
-              posts.map((post, index) => (
+            {allPosts.length > 0 ? (
+              allPosts.map((post, index) => (
                 <Card
                   key={post._id} // Ensure each child has a unique key for performance
-                  profilePic={post?.user?.displayPicture || "/images/userLogo.jpg"}
+                  profilePic={
+                    post?.user?.displayPicture || "/images/userLogo.jpg"
+                  }
                   username={post?.user?.firstName}
                   timeAgo={`${calculateTimeAgoInHours(
                     post?.createdAt
