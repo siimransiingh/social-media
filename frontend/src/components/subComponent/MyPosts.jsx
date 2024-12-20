@@ -3,39 +3,41 @@ import { auth } from "../auth/firebase";
 import { getUser } from "../../API/userService";
 import { getPostofUser } from "../../API/postService";
 
-const MyPosts = ({ firstName, bio  }) => {
+const MyPosts = ({ bio  }) => {
   const [userDetail, setUserDetail] = useState(null);
   const [postImg, setPostsImg] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+const fetchUserData = async (user) => {
+  try {
+    const idToken = await user.getIdToken();
+    const userInfo = await getUser(user.uid, idToken);
+    const posts = await getPostofUser(user.uid, idToken);
 
-  const fetchUserData = async () => {
-    try {
-      auth.onAuthStateChanged(async (user) => {
-        if (user) {
-          const idToken = await user.getIdToken();
-          const userDetail = await getUser(user.uid, idToken);
-          const posts = await getPostofUser(user.uid, idToken);
+    setPostsImg(posts.data); // Assuming `posts.data` contains the array of posts
+    setUserDetail(userInfo.data);
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
-          setPostsImg(posts.data); // Assuming `posts.data` contains the array of posts
-          setUserDetail(userDetail);
-        } else {
-          console.log("User is not logged in");
-        }
-      });
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
-  };
-  useEffect(() => {
-    console.log("User details:", userDetail); // Check the structure of the userDetail object
-  }, [userDetail]);
 
   useEffect(() => {
-    fetchUserData();
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        fetchUserData(user);
+      } else {
+        setLoading(false);
+        console.log("User is not logged in");
+      }
+      console.log(userDetail)
+    });
+
+    // Cleanup listener on component unmount
+    return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    console.log("Posts updated:", postImg);
-  }, [postImg]);
 
   // Post component to display each post
   const Post = ({ media, likes, caption }) => {
@@ -72,16 +74,28 @@ const MyPosts = ({ firstName, bio  }) => {
     );
   };
 
+    if (loading) {
+      return <p>Loading...</p>;
+    }
+
+    if ( postImg.length === 0) {
+      return (
+        <p className="text-gray-500">
+          No posts available
+        </p>
+      );
+    }
+
   return (
     <div>
-      {postImg.length > 0 && userDetail ? (
+
         <div>
           <div>
             <p className="karla-font text-black text-[24px] font-extrabold">
-              {firstName}
+              {userDetail?.firstName}
             </p>
             <p className="kumbh-sans-font text-black font-normal text-[14px]">
-          {bio}
+              {bio}
             </p>
           </div>
           <div>
@@ -90,23 +104,24 @@ const MyPosts = ({ firstName, bio  }) => {
             </p>
             <div className="overflow-y-auto overflow-x-hidden max-h-[400px]">
               <div className="masonry-layout-mob masonry-layout mt-4">
-                {postImg.map((post, index) => (
-                  <Post
-                    key={index}
-                    media={post.media}
-                    likes={post.likes}
-                    caption={post.caption}
-                  />
-                ))}
+                {postImg && postImg.length > 0 ? (
+                  postImg.map((post, index) => (
+                    <Post
+                      key={index}
+                      media={post.media}
+                      likes={post.likes}
+                      caption={post.caption}
+                    />
+                  ))
+                ) : (
+                  <p className="text-gray-500">
+                    No posts available or user not logged in.
+                  </p>
+                )}
               </div>
             </div>
           </div>
         </div>
-      ) : (
-        <p className="text-gray-500">
-          No posts available or user not logged in.
-        </p>
-      )}
     </div>
   );
 };

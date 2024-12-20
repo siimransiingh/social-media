@@ -2,20 +2,37 @@ import { useState, useEffect } from "react";
 import { auth } from "../auth/firebase";
 import { editUser } from "../../API/userService";
 
-const EditProfile = ({ onSave }) => {
-  const [firstName, setFirstName] = useState("");
-  const [bio, setBio] = useState("");
+const EditProfile = ({ onSave, initialData, profilePicture , bgPicture }) => {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    bio: "",
+    profilePicture: "",
+    bgpicture : ""
 
+  });
+console.log(bgPicture);
+   useEffect(() => {
+     // Initialize form with user data if available
+     if (initialData) {
+       setFormData({
+         firstName: initialData.firstName || "",
+         bio: initialData.bio || "",
+         displayPicture: profilePicture || "",
+         backgroundPicture: bgPicture || "",
+       });
+     }
+
+     console.log("changed")
+   }, [initialData]);
+  
   // Handle input change for firstName and bio
-  const handleInput = (e) => {
-    const { name, value } = e.target;
-    if (name === "firstName") {
-      setFirstName(value);
-    } else if (name === "bio") {
-      setBio(value);
-    }
-  };
-
+const handleInput = (e) => {
+  const { name, value } = e.target;
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
 
   // Handle Save button click
   const handleSave = async () => {
@@ -23,13 +40,9 @@ const EditProfile = ({ onSave }) => {
       auth.onAuthStateChanged(async (user) => {
         if (user) {
           const idToken = await user.getIdToken();
-           console.log(idToken);
-          const updatedData = {
-            firstName,
-            bio,
-          };
-          const response = await editUser(user.uid, idToken, updatedData);
-          console.log(idToken)
+
+          const response = await editUser(user.uid, idToken, formData);
+
           console.log("User updated:", response.data);
           onSave(); // Call onSave to close the form or update the UI
         } else {
@@ -51,7 +64,7 @@ const EditProfile = ({ onSave }) => {
         <input
           type="text"
           name="firstName"
-          value={firstName}
+          value={formData.firstName}
           onChange={handleInput}
           className="border-b-2 border-[#939090] kumbh-sans-font font-semibold text-sm text-[#000000] resize-none focus:outline-none"
         />
@@ -64,7 +77,7 @@ const EditProfile = ({ onSave }) => {
         </label>
         <textarea
           name="bio"
-          value={bio}
+          value={formData.bio}
           onChange={handleInput}
           className="border-b-2 border-[#939090] kumbh-sans-font font-semibold text-sm text-[#000000] resize-none focus:outline-none"
           rows="1"

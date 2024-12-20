@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { auth } from './../auth/firebase';
+import { auth } from "./../auth/firebase";
 import { createPost } from "../../API/postService";
 import { cloudinaryConfig } from "../../../config/cloudinary";
 
@@ -8,7 +8,6 @@ const UploadPost = ({ onBack }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [caption, setCaption] = useState("");
   const [text, setText] = useState("");
-
 
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
@@ -39,74 +38,74 @@ const UploadPost = ({ onBack }) => {
     });
   };
 
-const uploadMedia = async (file) => {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", cloudinaryConfig.uploadPreset); // Get this from Cloudinary dashboard
+  const uploadMedia = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", cloudinaryConfig.uploadPreset); // Get this from Cloudinary dashboard
 
-    const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`,
-      {
-        method: "POST",
-        body: formData,
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+      return data.secure_url;
+    } catch (error) {
+      console.error("Upload failed:", error);
+      throw error;
+    }
+  };
+
+  const handleUpload = async () => {
+    try {
+      const user = auth.currentUser;
+
+      if (!user) {
+        alert("Please log in first");
+        return;
       }
-    );
 
-    const data = await response.json();
-    return data.secure_url;
-  } catch (error) {
-    console.error("Upload failed:", error);
-    throw error;
-  }
-};
+      const idToken = await user.getIdToken();
 
-const handleUpload = async () => {
-  try {
-  
-    const user = auth.currentUser;
+      let mediaUrls = [];
+      if (selectedFiles.length > 0) {
+        const uploadPromises = selectedFiles.map((file) => uploadMedia(file));
+        mediaUrls = await Promise.all(uploadPromises);
+      }
+      console.log(mediaUrls);
+      const postData = {
+        userId: user.uid,
+        mime: selectedFiles.length > 0 ? selectedFiles[0].type : "text/plain",
+        caption: caption || "",
+        media: mediaUrls,
+        text: text || "",
+      };
 
-    if (!user) {
-      alert("Please log in first");
-      return;
+      console.log("Sending post data:", postData); // Add this log
+
+      const response = await createPost(postData, idToken);
+      console.log("Post Created:", response.data);
+      alert("Post uploaded successfully!");
+      setSelectedFiles([]);
+      setCaption("");
+      setText("");
+      onBack();
+    } catch (error) {
+      console.error("Error uploading post:", error);
+      if (error.response) {
+        console.error("Error response:", error.response.data); // Add this log
+        alert(
+          "Upload failed: " + (error.response.data.message || error.message)
+        );
+      } else {
+        alert("Upload failed: " + error.message);
+      }
     }
-
-    const idToken = await user.getIdToken();
-
-    let mediaUrls = [];
-    if (selectedFiles.length > 0) {
-      const uploadPromises = selectedFiles.map((file) => uploadMedia(file));
-      mediaUrls = await Promise.all(uploadPromises);
-    }
-console.log(mediaUrls)
-    const postData = {
-      userId: user.uid,
-      mime: selectedFiles.length > 0 ? selectedFiles[0].type : "text/plain",
-      caption: caption || "",
-      media: mediaUrls,
-      text: text || "",
-    };
-
-    console.log("Sending post data:", postData); // Add this log
-
-    const response = await createPost(postData, idToken);
-    console.log("Post Created:", response.data);
-    alert("Post uploaded successfully!");
-    setSelectedFiles([]);
-    setCaption("");
-    setText("");
-    onBack();
-  } catch (error) {
-    console.error("Error uploading post:", error);
-    if (error.response) {
-      console.error("Error response:", error.response.data); // Add this log
-      alert("Upload failed: " + (error.response.data.message || error.message));
-    } else {
-      alert("Upload failed: " + error.message);
-    }
-  }
-};
-
+  };
 
   return (
     <div className="z-10 fixed top-0 bg-white w-full min-h-screen px-4 py-[25px]">
@@ -167,10 +166,11 @@ console.log(mediaUrls)
             {selectedFiles.map((_, index) => (
               <button
                 key={index}
-                className={`h-1 w-1 rounded-full ${index === currentIndex
+                className={`h-1 w-1 rounded-full ${
+                  index === currentIndex
                     ? "bg-black"
                     : "bg-gray-400 hover:bg-gray-600"
-                  }`}
+                }`}
                 onClick={() => handleBulletClick(index)}
               ></button>
             ))}

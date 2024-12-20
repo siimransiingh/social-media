@@ -8,7 +8,7 @@ const userSchema = new Schema({
   posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
   displayPicture: { type: String},
   uid: { type: String },
-  backgroudPicture:{type: String}
+  backgroundPicture:{type: String}
 });
 
 module.exports = model('User', userSchema);

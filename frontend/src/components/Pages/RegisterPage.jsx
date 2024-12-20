@@ -34,7 +34,8 @@ function RegisterPage() {
           email: user.email,
           bio: "",
           displayPicture: "",
-          uid:user.uid
+          uid: user.uid,
+          backgroundPicture: "",
         });
         console.log("MongoDB response:", response.data);
         console.log("registered");

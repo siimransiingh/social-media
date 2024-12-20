@@ -4,11 +4,13 @@ import MyPosts from "../subComponent/MyPosts";
 import EditProfile from "../subComponent/EditProfile";
 import UploadButton from "../subComponent/UploadButton";
 import { getUser } from "../../API/userService";
+import { cloudinaryConfig } from "../../../config/cloudinary";
 
 function ProfilePage() {
   const [userDetail, setUserDetail] = useState(null);
   const [isEditing, setIsEditing] = useState(false); // State to track if edit mode is active
-
+  const [profilePicture, setProfilePicture] = useState();
+  const [backgroundPicture, setBackgroundPicture] = useState();
   const fetchUserData = async () => {
     auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -22,17 +24,38 @@ function ProfilePage() {
     });
   };
 
-
-
   useEffect(() => {
     fetchUserData();
   }, []);
+
+  const uploadMedia = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", cloudinaryConfig.uploadPreset); // Get this from Cloudinary dashboard
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+      return data.secure_url;
+    } catch (error) {
+      console.error("Upload failed:", error);
+      throw error;
+    }
+  };
 
   const handleEditClick = () => {
     setIsEditing(true); // Switch to edit mode
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    await fetchUserData();
     setIsEditing(false); // Exit edit mode and show MyPosts
   };
 
@@ -40,39 +63,97 @@ function ProfilePage() {
     return <p>Loading...</p>;
   }
 
+  const handleProfilePictureChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        const uploadedUrl = await uploadMedia(file);
+        setProfilePicture(uploadedUrl);
+      } catch (error) {
+        console.error("Error updating profile picture:", error);
+      }
+    }
+  };
+
+  const handleBackgroundPictureChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        const uploadedUrl = await uploadMedia(file);
+        setBackgroundPicture(uploadedUrl);
+      } catch (error) {
+        console.error("Error updating background picture:", error);
+      }
+    }
+  };
+
+  console.log(profilePicture);
+  console.log(backgroundPicture);
   return (
     <div className=" fixed w-full">
       {userDetail && (
         <div className="relative w-full">
           {/* Background Image */}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            id="backgroundPictureInput"
+            onChange={handleBackgroundPictureChange}
+          />
           <a href="/explore">
             <img
               src="images/HiArrowSmLeft.svg"
               className="absolute left-2 top-1"
             />
+          </a>
+
+          <div>
             {isEditing && (
-              <div className="absolute flex items-center justify-center right-2 bottom-2 bg-[#F4F4F4] w-[27px] h-[27px] rounded-full">
-                <img src="images/HiPencil.svg" className=" " />
+              <div
+                onClick={() => {
+                  console.log("Div clicked");
+                  document.getElementById("backgroundPictureInput").click();
+                }}
+               
+              >
+                <img
+                  alt="editBg"
+                  src="images/HiPencil.svg"
+                  className=" absolute right-2 bg-[#F4F4F4] cursor-pointer bottom-2 w-[27px] h-[27px] rounded-full  "
+                />
               </div>
             )}
-          </a>
-          <img
-            className="w-[100%] object-cover h-[189px] rounded-b-[20px]"
-            src="/images/img3.svg"
-            alt="Background"
-          />
+            <img
+              className="w-[100%] object-cover h-[189px] rounded-b-[20px]"
+              src={userDetail?.data?.backgroundPicture || "/images/img3.svg"}
+              alt="Background"
+            />
+          </div>
 
           {/* Profile Image and Edit Button */}
-          <div className="absolute top-[130px] left-4 flex flex-row justify-start gap-4 items-end w-full">
+          <div className="absolute top-[130px] left-4 flex flex-row justify-start gap-4 items-end">
             <div className="w-[112px] h-[112px]">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                id="profilePictureInput"
+                onChange={handleProfilePictureChange}
+              />
               {isEditing && (
-                <div className="z-10 absolute flex items-center justify-center top-14 left-[93px] bg-[#F4F4F4] w-[27px] h-[27px] rounded-full">
-                  <img src="images/HiPencil.svg" className=" " />
+                <div
+                  onClick={() =>
+                    document.getElementById("profilePictureInput").click()
+                  }
+                  className="z-10 cursor-pointer absolute flex items-center justify-center top-14 left-[93px] bg-[#F4F4F4] w-[27px] h-[27px] rounded-full"
+                >
+                  <img alt="editpfp" src="images/HiPencil.svg" className=" " />
                 </div>
               )}
               <img
                 className="transform w-full h-full object-cover rounded-full"
-                src={"/images/userLogo.jpg"}
+                src={userDetail?.data?.displayPicture || "/images/userLogo.jpg"}
                 alt="Profile"
               />
             </div>
@@ -92,11 +173,14 @@ function ProfilePage() {
           <div className="z-100 fixed px-4 top-[32%] w-full">
             {isEditing ? (
               <div className="mt-[30px]">
-                <EditProfile onSave={handleSave} />{" "}
+                <EditProfile profilePicture={profilePicture} bgPicture={backgroundPicture}
+                  onSave={handleSave}
+                  initialData={userDetail.data}
+                />{" "}
                 {/* Pass handleBackClick to go back */}
               </div>
             ) : (
-              <MyPosts firstName={userDetail?.data.firstName} bio={userDetail?.data?.bio}/>
+              <MyPosts bio={userDetail?.data?.bio} />
             )}
           </div>
         </div>

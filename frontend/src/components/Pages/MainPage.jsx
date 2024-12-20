@@ -62,7 +62,7 @@ function MainPage() {
   if (loading) {
     return <div>Loading...</div>;
   }
-  console.log(userDetail.displayPicture);
+
   const calculateTimeAgoInHours = (createdAt) => {
     const createdTime = new Date(createdAt).getTime();
     const currentTime = Date.now();
@@ -78,12 +78,12 @@ function MainPage() {
           <div className="flex flex-col gap-[31px]">
             {" "}
             <div className="flex flex-row justify-between items-center">
-              <div className="flex flex-row items-center">
+              <div className="flex flex-row items-center gap-2">
                 <a href="/myProfile">
                   <img
                     href="/myProfile"
-                    className="w-[50px] h-[50px] rounded-full"
-                    src={"/images/userLogo.jpg"}
+                    className="w-[50px] h-[50px] rounded-full object-cover"
+                    src={userDetail.displayPicture || "/images/userLogo.jpg"}
                   />
                 </a>
                 <div>
@@ -114,7 +114,7 @@ function MainPage() {
               posts.map((post, index) => (
                 <Card
                   key={post._id} // Ensure each child has a unique key for performance
-                  profilePic="/images/userLogo.jpg"
+                  profilePic={post?.user?.displayPicture || "/images/userLogo.jpg"}
                   username={post?.user?.firstName}
                   timeAgo={`${calculateTimeAgoInHours(
                     post?.createdAt

@@ -34,9 +34,10 @@ function SignInWithGoogle() {
         lastName: user.displayName?.split(" ")[1] || "",
         email: user.email,
         bio: "",
-        displayPicture: user.photoURL,
+        displayPicture: "",
         uid: user.uid,
         idToken: idToken,
+        backgroundPicture: "",
       });
 
       console.log("MongoDB response:", response.data);
