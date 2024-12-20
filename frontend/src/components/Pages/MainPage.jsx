@@ -33,7 +33,7 @@ function MainPage() {
           // Fetch posts using the ID token
           const postsResponse = await getAllPosts(idToken);
           setPosts(postsResponse.data); // Set posts data
-         
+
           setLoading(false); // Set loading to false once data is fetched
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -45,6 +45,7 @@ function MainPage() {
       }
     });
   };
+  
   async function handleLogout() {
     try {
       await auth.signOut();
@@ -57,17 +58,18 @@ function MainPage() {
   useEffect(() => {
     fetchUserData();
   }, []);
-console.log(posts)
+  console.log(posts);
   if (loading) {
-    return <div>Loading...</div>; 
+    return <div>Loading...</div>;
   }
-const calculateTimeAgoInHours = (createdAt) => {
-  const createdTime = new Date(createdAt).getTime(); 
-  const currentTime = Date.now(); 
-  const differenceInMilliseconds = currentTime - createdTime; 
-  const differenceInHours = differenceInMilliseconds / (1000 * 60 * 60);
-  return Math.floor(differenceInHours); 
-};
+  console.log(userDetail.displayPicture);
+  const calculateTimeAgoInHours = (createdAt) => {
+    const createdTime = new Date(createdAt).getTime();
+    const currentTime = Date.now();
+    const differenceInMilliseconds = currentTime - createdTime;
+    const differenceInHours = differenceInMilliseconds / (1000 * 60 * 60);
+    return Math.floor(differenceInHours);
+  };
 
   return (
     <div>
@@ -81,11 +83,7 @@ const calculateTimeAgoInHours = (createdAt) => {
                   <img
                     href="/myProfile"
                     className="w-[50px] h-[50px] rounded-full"
-                    src={
-                      userDetail.displayPicture
-                        ? userDetail.displayPicture
-                        : "/images/userLogo.jpg"
-                    }
+                    src={"/images/userLogo.jpg"}
                   />
                 </a>
                 <div>

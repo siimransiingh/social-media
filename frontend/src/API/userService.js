@@ -11,3 +11,11 @@ export const getUser = (id, idToken) => {
     },
   });
 };
+
+export const editUser = (id, idToken) => {
+  return API.get(`/${id}`, {
+    headers: {
+      Authorization: `Bearer ${idToken}`,
+    },
+  });
+};

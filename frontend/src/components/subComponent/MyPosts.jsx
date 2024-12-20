@@ -1,72 +1,77 @@
 import { useState, useEffect } from "react";
-import { auth, db } from "../auth/firebase";
-import { getDoc, doc } from "firebase/firestore";
+import { auth } from "../auth/firebase";
+import { getUser } from "../../API/userService";
+import { getPostofUser } from "../../API/postService";
 
 const MyPosts = () => {
   const [userDetail, setUserDetail] = useState(null);
+  const [postImg, setPostsImg] = useState([]);
 
-  // Fetch user data from Firebase
   const fetchUserData = async () => {
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        const docRef = doc(db, "Users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUserDetail({ ...user, ...docSnap.data() }); // Combine user data and Firestore data
+    try {
+      auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          const idToken = await user.getIdToken();
+          const userDetail = await getUser(user.uid, idToken);
+          const posts = await getPostofUser(user.uid, idToken);
+
+          setPostsImg(posts.data); // Assuming `posts.data` contains the array of posts
+          setUserDetail(userDetail);
         } else {
-          console.log("No user data found");
+          console.log("User is not logged in");
         }
-      } else {
-        console.log("User is not logged in");
-      }
-    });
+      });
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
   };
 
   useEffect(() => {
     fetchUserData();
   }, []);
 
-  const postInfo = [
-    { imgSrc: "/images/img4.svg", likes: 35, caption: "alala" },
-    { imgSrc: "/images/img6.svg", likes: 35, caption: "alala" },
-    { imgSrc: "/images/img1.svg", likes: 35, caption: "alala" },
-    { imgSrc: "/images/img1.svg", likes: 35, caption: "alala" },
-    { imgSrc: "/images/img1.svg", likes: 35, caption: "alala" },
-    { imgSrc: "/images/img9.svg", likes: 35, caption: "alala" },
-    { imgSrc: "/images/img9.svg", likes: 35, caption: "alala" },
-    { imgSrc: "/images/img9.svg", likes: 35, caption: "alala" },
-    { imgSrc: "/images/img9.svg", likes: 35, caption: "alala" },
-    { imgSrc: "/images/img10.svg", likes: 35, caption: "alala" },
-    { imgSrc: "/images/img5.svg", likes: 35, caption: "alala" },
-    { imgSrc: "/images/img5.svg", likes: 35, caption: "alala" },
-  ];
+  useEffect(() => {
+    console.log("Posts updated:", postImg);
+  }, [postImg]);
 
   // Post component to display each post
-  const Post = ({ imgSrc, likes, caption }) => (
-    <div className="flex flex-col">
-      <div className="flex  relative">
-        <div className="absolute bottom-6 left-3">
+const Post = ({ media, likes, caption }) => {
+  return (
+    <div className="flex flex-col mb-4">
+      <div className="relative">
+        <div className="absolute bottom-6 left-3 z-10">
           <div className="flex flex-col items-left justify-center">
             <p className="text-sm text-white kumbh-sans-font mt-2">{caption}</p>
             <div className="flex flex-row items-center">
-              <img src="/images/HiHeartWhite.svg" />{" "}
+              <img src="/images/HiHeartWhite.svg" alt="Likes" />
               <p className="text-xs text-white font-semibold">{likes}</p>
             </div>
           </div>
         </div>
+
+        {/* Display only the first image from the media array */}
         <img
           className="masonry-item-mob min-h-full min-w-full object-cover rounded-lg"
-          src={imgSrc}
-          alt="Post"
+          src={media[0]}
+          alt={`Media 1`}
         />
+
+        {/* Display number of images in the media array */}
+        {media.length > 1 && (
+          <div className="absolute bottom-3 right-3 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded-full">
+            {media.length} {media.length > 1 ? "images" : "image"}
+          </div>
+        )}
       </div>
     </div>
   );
+};
+
 
   return (
     <div>
-      {userDetail && (
-        <div className="">
+      {postImg.length > 0 && userDetail ? (
+        <div>
           <div>
             <p className="karla-font text-black text-[24px] font-extrabold">
               {userDetail.firstName}
@@ -76,16 +81,16 @@ const MyPosts = () => {
               the little things 💕
             </p>
           </div>
-          <div className=" ">
+          <div>
             <p className="karla-font font-semibold text-[18px] text-black mt-6">
               My Posts
             </p>
             <div className="overflow-y-auto overflow-x-hidden max-h-[400px]">
               <div className="masonry-layout-mob masonry-layout mt-4">
-                {postInfo.map((post, index) => (
+                {postImg.map((post, index) => (
                   <Post
                     key={index}
-                    imgSrc={post.imgSrc}
+                    media={post.media}
                     likes={post.likes}
                     caption={post.caption}
                   />
@@ -94,6 +99,10 @@ const MyPosts = () => {
             </div>
           </div>
         </div>
+      ) : (
+        <p className="text-gray-500">
+          No posts available or user not logged in.
+        </p>
       )}
     </div>
   );

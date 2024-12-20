@@ -27,6 +27,13 @@ export const getAllPosts = (idToken) => API.get('/',  {
     headers: {
       Authorization: `Bearer ${idToken}`,
     },
+});
+  
+// API to get  post of one suer
+export const getPostofUser = (uid, idToken) => API.get(`/post/${uid}`, {
+    headers: {
+      Authorization: `Bearer ${idToken}`,
+    },
   });
 
 // API to get a single post by ID
