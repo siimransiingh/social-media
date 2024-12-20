@@ -2,7 +2,9 @@ const express = require("express");
 const User = require("../models/User");
 const admin = require("firebase-admin");
 const router = express.Router();
-const serviceAccount = require("../social-media-984db-firebase-adminsdk-9ibc3-1fcd4185ea.json");
+const serviceAccount = require("/etc/secrets/firebase-admin.json");
+
+
 // Initialize Firebase Admin
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 
