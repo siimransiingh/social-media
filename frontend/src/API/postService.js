@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base API configuration
-const API = axios.create({ baseURL: 'http://localhost:5000/api/posts' });
+const API = axios.create({ baseURL: 'https://social-media-q6j7.onrender.com/api/posts' });
 
 
 

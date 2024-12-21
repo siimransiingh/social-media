@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: 'http://localhost:5000/api/users' });
+const API = axios.create({ baseURL: 'https://social-media-q6j7.onrender.com/api/users' });
 
 export const createUser = (userData) => API.post('/', userData);
 
