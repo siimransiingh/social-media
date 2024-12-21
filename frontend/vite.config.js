@@ -5,9 +5,13 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'dist',
-    sourcemap: true,
-    commonjsOptions: {
-      include: []
+    rollupOptions: {
+      external: [
+        '@rollup/rollup-linux-x64-gnu'
+      ],
+      output: {
+        manualChunks: undefined
+      }
     }
   }
 })
